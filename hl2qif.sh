@@ -6,34 +6,35 @@ OUTFILE=$2
 
 if [[ -z $INFILE ]]
 then
-	echo "Missing argument"
+	echo "Missing arguments"
 	echo $USAGE
-	exit 10
+	exit 1
 fi
 
 if [[ -z $OUTFILE ]]
 then
 	echo "Missing argument"
 	echo $USAGE
-	exit 11
+	exit 2
 fi
 
 if [[ ! -e $INFILE ]]
 then
 	echo "File $INFILE does not exist"
-	exit 1
+	exit 3
 fi
 
 if [[ -e $OUTFILE ]]
 then
 	echo "File $OUTFILE already exists"
-	exit 2
+	exit 4
 fi
 
 if [[ $INFILE == $OUTFILE ]]
 then
-	echo "File $INFILE does not exist"
-	exit 3
+	echo "I seriously doubt you want the output file to be the same as the input file"
+	echo $USAGE
+	exit 5
 fi
 
 echo -n "" > $OUTFILE
@@ -48,12 +49,9 @@ do
 	line_tr=$(echo $line | awk -F'","' {'print $1"|"$2"|"$3"|"$4"|"$5"|"$6"|"$7'} | sed 's/,//g')
 	IFS='|'  read DATE_TRADE DATE_SETTLE TX_TYPE DESC UNIT_COST_P UNIT_QTY TOTAL_VALUE_P <<<  "${line_tr:1:${#line_tr}-2}"
 	
-	# Jesus. The last 3 words (num  @  num) of the desc are not in the security name.
+	# The last 3 words (num  @  num) of the desc are not in the security name.
 	# The commission is not supplied and must be calculated from the difference between the TOTAL_VALUE and UNIT_COST*UNIT_QTY
 	# Price is in pence
-	
-	
-	
 
 	case "$TX_TYPE" in
 		B[0-9]*)
