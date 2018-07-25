@@ -138,7 +138,7 @@ do
 			#SiPP contribution claim
 			printf "!Type:Bank\nD$DATE_TRADE\nT$TOTAL_VALUE_P\nC*\nP$DESC\n^\n" >> $OUTFILE
 			;;
-		DRI[0-9]*)
+		DRI*)
 			#Dividend Reinvestment
 			printf "!Type:Bank\nD$DATE_TRADE\nT$TOTAL_VALUE_P\nC*\nP$DESC\n^\n" >> $OUTFILE
 			;;
@@ -154,6 +154,10 @@ do
 			;;
 		"CHAPS")
 			# Account Withdrawal
+			printf "!Type:Bank\nD$DATE_TRADE\nT$TOTAL_VALUE_P\nC*\nP$DESC\n^\n" >> $OUTFILE
+			;;
+		"Refund")
+			# Commission Refund
 			printf "!Type:Bank\nD$DATE_TRADE\nT$TOTAL_VALUE_P\nC*\nP$DESC\n^\n" >> $OUTFILE
 			;;
 		*)
