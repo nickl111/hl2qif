@@ -5,6 +5,7 @@ These scripts are little helpers to convert Hargreaves Lansdown and Interactive 
 Only tested in OSX but they should work on any bash version.
 
 ##hl2qif
+
 ### Intro
 HL have gone out of their way to make this as hard as possible. Vital information (commission, ticker) is missing and must be deduced and their internal systems for dealing with foreign shares (everything is reported in Sterling) mean that it messes with Banktivity's systems big time. You will end up with a mess if you try to get quotes for foreign stocks that are created by this method. The only silver lining is that HL are so expensive for this that you should be using someone else anyway.
 
@@ -45,6 +46,7 @@ If you get some warnings about lines not matching (possible, there seem to be a 
 Now you need to go add the tickers for any new stocks and make sure the "traded in pence" box is ticked. Also you need to assign the correct income category for any dividends etc.
 
 #ibkr2qif
+
 Not as hard as above but still with some issues:
 - You must create a custom statement with only Trades and Dividends in it. Actually you can have whatever you like but trades aren't in the default reports so you must create a custom one whatever.
 - The ticker is the only thing available thus you will not get pretty names in your securities only the ticker
