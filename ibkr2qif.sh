@@ -77,7 +77,7 @@ do
 				"Stocks")
 					line_decomma=$(echo $line | awk -F'"' -v OFS='' '{ for (i=2; i<=NF; i+=2) gsub(",", "", $i) } 1')
 					line_tr=$(echo $line_decomma | awk -F',' {'print $5"|"$6"|"$7"|"$9"|"$10"|"$11"|"$12'})
-					IFS='|' read CURR TICKER DATE_TRADE UNIT_QTY UNIT_COST TOTAL_VALUE_P COMM <<<  "$line_tr"
+					IFS='|' read CURR TICKER DATE_TRADE UNIT_QTY UNIT_COST TRADE_VALUE_P COMM <<<  "$line_tr"
 					
 					if [[ $CURR == 'GBP' ]]
 					then
@@ -86,21 +86,23 @@ do
 						SEC_NAME=$TICKER
 					fi
 					
-					if [[ ${TOTAL_VALUE_P:0:1} == "-" ]]
+					if [[ ${TRADE_VALUE_P:0:1} == "-" ]]
 					then
 						#buy
 						
 						#UNIT_COST=$(echo "scale=4;$UNIT_COST_P/100" | bc)
-						TOTAL_VALUE_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($TOTAL_VALUE_P)" | bc)
+						TRADE_VALUE_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($TRADE_VALUE_P)" | bc)
 						COMM_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($COMM)" | bc)
+						TOTAL_VALUE=$(echo "$TRADE_VALUE_ABS + $COMM_ABS" | bc )
 						QTY_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($UNIT_QTY)" | bc)
-						printf "!Type:Invst\nD$DATE_TRADE\nNBuy\nY$SEC_NAME\nI$UNIT_COST\nQ$QTY_ABS\nC*\nO$COMM_ABS\nT$TOTAL_VALUE_ABS\n^\n" >> $OUTROOT.$CURR.qif
+						printf "!Type:Invst\nD$DATE_TRADE\nNBuy\nY$SEC_NAME\nI$UNIT_COST\nQ$QTY_ABS\nT$TOTAL_VALUE\nO$COMM\nCc\n^\n" >> $OUTROOT.$CURR.qif
 					else
 						#sell
-						TOTAL_VALUE_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($TOTAL_VALUE_P)" | bc)
+						TRADE_VALUE_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($TRADE_VALUE_P)" | bc)
 						COMM_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($COMM)" | bc)
+						TOTAL_VALUE=$(echo "$TRADE_VALUE_ABS - $COMM_ABS" | bc )
 						QTY_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($UNIT_QTY)" | bc)
-						printf "!Type:Invst\nD$DATE_TRADE\nNSell\nY$SEC_NAME\nI$UNIT_COST\nQ$QTY_ABS\nC*\nO$COMM_ABS\nT$TOTAL_VALUE_P\n^\n" >> $OUTROOT.$CURR.qif
+						printf "!Type:Invst\nD$DATE_TRADE\nNSell\nY$SEC_NAME\nI$UNIT_COST\nQ$QTY_ABS\nT$TOTAL_VALUE\nO$COMM\nCc\n^\n" >> $OUTROOT.$CURR.qif
 					
 					fi
 				;;
@@ -112,7 +114,7 @@ do
 					
 					line_decomma=$(echo $line | awk -F'"' -v OFS='' '{ for (i=2; i<=NF; i+=2) gsub(",", "", $i) } 1')
 					line_tr=$(echo $line_decomma | awk -F',' {'print $5"|"$6"|"$7"|"$9"|"$10"|"$11"|"$12'})
-					IFS='|' read CURR TICKER DATE_TRADE UNIT_QTY UNIT_COST TOTAL_VALUE_P COMM <<<  "$line_tr"
+					IFS='|' read CURR TICKER DATE_TRADE UNIT_QTY UNIT_COST TRADE_VALUE_P COMM <<<  "$line_tr"
 					
 					# TICKER is a currency pair. 1st half is what you are buying, a second what you are paying with
 					# - Qty means the opposite
@@ -120,23 +122,23 @@ do
 					
 					PAIR=$(echo $TICKER | awk -F'.' {'print $1'})
 					
-					if [[ ${TOTAL_VALUE_P:0:1} == "-" ]]
+					if [[ ${TRADE_VALUE_P:0:1} == "-" ]]
 					then
 						#buy
 						
 						#UNIT_COST=$(echo "scale=4;$UNIT_COST_P/100" | bc)
-						TOTAL_VALUE_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($TOTAL_VALUE_P)" | bc)
+						TRADE_VALUE_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($TRADE_VALUE_P)" | bc)
 						COMM_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($COMM)" | bc)
 						QTY_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($UNIT_QTY)" | bc)
-						printf "!Type:Invst\nD$DATE_TRADE\nNXOut\nY$TICKER\nI$UNIT_COST\nQ$QTY_ABS\nC*\nO$COMM_ABS\nT$TOTAL_VALUE_ABS\n^\n" >> $OUTROOT.$CURR.qif
-						printf "!Type:Invst\nD$DATE_TRADE\nNXIn\nY$TICKER\nI$UNIT_COST\nQ$TOTAL_VALUE_ABS\nC*\nO$COMM_ABS\nT$QTY_ABS\n^\n" >> $OUTROOT.$PAIR.qif
+						printf "!Type:Invst\nD$DATE_TRADE\nNXOut\nY$TICKER\nI$UNIT_COST\nQ$QTY_ABS\nC*\nO$COMM_ABS\nT$TRADE_VALUE_ABS\n^\n" >> $OUTROOT.$CURR.qif
+						printf "!Type:Invst\nD$DATE_TRADE\nNXIn\nY$TICKER\nI$UNIT_COST\nQ$TRADE_VALUE_ABS\nC*\nO$COMM_ABS\nT$QTY_ABS\n^\n" >> $OUTROOT.$PAIR.qif
 					else
 						#sell
-						TOTAL_VALUE_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($TOTAL_VALUE_P)" | bc)
+						TRADE_VALUE_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($TRADE_VALUE_P)" | bc)
 						COMM_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($COMM)" | bc)
 						QTY_ABS=$(echo "define abs(x) {if (x<0) {return -x}; return x;}; abs($UNIT_QTY)" | bc)
-						printf "!Type:Invst\nD$DATE_TRADE\nNXIn\nY$TICKER\nI$UNIT_COST\nQ$QTY_ABS\nC*\nO$COMM_ABS\nT$TOTAL_VALUE_ABS\n^\n" >> $OUTROOT.$CURR.qif
-						printf "!Type:Invst\nD$DATE_TRADE\nNXOut\nY$TICKER\nI$UNIT_COST\nQ$TOTAL_VALUE_ABS\nC*\nO$COMM_ABS\nT$QTY_ABS\n^\n" >> $OUTROOT.$PAIR.qif
+						printf "!Type:Invst\nD$DATE_TRADE\nNXIn\nY$TICKER\nI$UNIT_COST\nQ$QTY_ABS\nC*\nO$COMM_ABS\nT$TRADE_VALUE_ABS\n^\n" >> $OUTROOT.$CURR.qif
+						printf "!Type:Invst\nD$DATE_TRADE\nNXOut\nY$TICKER\nI$UNIT_COST\nQ$TRADE_VALUE_ABS\nC*\nO$COMM_ABS\nT$QTY_ABS\n^\n" >> $OUTROOT.$PAIR.qif
 					
 					fi
 				;;
