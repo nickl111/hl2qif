@@ -147,6 +147,11 @@ do
 			SEC_NAME=$(echo $DESC | sed '$s/ Net Dividend Payment$//')
 			printf "!Type:Invst\nD$DATE_TRADE\nNDiv\nY$SEC_NAME\nT$TOTAL_VALUE_P\nM$DESC\n^\n" >> $OUTFILE
 			;;
+		"PDG CR")
+                        #Property Income
+                        SEC_NAME=$(echo $DESC | sed '$s/ Gross Dividend Payment$//')
+                        printf "!Type:Invst\nD$DATE_TRADE\nNDiv\nY$SEC_NAME\nT$TOTAL_VALUE_P\nM$DESC\n^\n" >> $OUTFILE
+                        ;;
 		"INT CR")
 			#Interest income
 			SEC_NAME=$(echo $DESC | sed '$s/ Dividend Payment$//')
