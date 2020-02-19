@@ -74,7 +74,8 @@ do
 			TX_TYPE=${line:18:6}
 			
 			case "$TX_TYPE" in
-				"Stocks")
+				"Stocks")# | "Equity")
+					#Trades,Data,Trade,Equity and Index Options,USD,MU 16AUG19 40.0 P,"2019-08-15, 09:36:50",CBOE2,-4,0.12,48,-4.9005936,P
 					line_decomma=$(echo $line | awk -F'"' -v OFS='' '{ for (i=2; i<=NF; i+=2) gsub(",", "", $i) } 1')
 					line_tr=$(echo $line_decomma | awk -F',' {'print $5"|"$6"|"$7"|"$9"|"$10"|"$11"|"$12'})
 					IFS='|' read CURR TICKER DATE_TRADE UNIT_QTY UNIT_COST TRADE_VALUE_P COMM <<<  "$line_tr"
@@ -105,6 +106,10 @@ do
 						printf "!Type:Invst\nD$DATE_TRADE\nNSell\nY$SEC_NAME\nI$UNIT_COST\nQ$QTY_ABS\nT$TOTAL_VALUE\nO$COMM\nCc\n^\n" >> $OUTROOT.$CURR.qif
 					
 					fi
+				;;
+				"Equity")
+					#Trades,Header,DataDiscriminator,Asset Category,Currency,Symbol,Date/Time,Exchange,Quantity,T. Price,Proceeds,Comm/Fee,Code
+					
 				;;
 				"Forex,")
 					#Trades,Header,DataDiscriminator,Asset Category,Currency,Symbol,Date/Time,Exchange,Quantity,T. Price,Proceeds,Comm in GBP,Code
